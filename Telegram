@@ -1,0 +1,92 @@
+import time
+import telepot
+from telepot.loop import MessageLoop
+import RPi.GPIO as GPIO
+
+#Temperature sensor inputs
+import sys
+import Adafruit_DHT
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(4, GPIO.OUT)
+GPIO.setup(17, GPIO.OUT)
+GPIO.setup(27, GPIO.OUT)
+GPIO.setup(23, GPIO.OUT)
+GPIO.output(4,True)
+GPIO.output(17,True)
+GPIO.output(27,True)
+GPIO.output(23,True)
+
+def handle(msg):
+    chat_id = msg['chat']['id']
+    command = msg['text']
+
+    print 'Got command: %s' % command
+
+    #Scenes
+    if command == '/water':
+        bot.sendMessage(chat_id, "Watering the plants")
+        GPIO.output(17,False)
+        time.sleep(300)
+        GPIO.output(17,True)
+        bot.sendMessage(chat_id, "Plants are watered")
+    elif command == '/drain':
+        bot.sendMessage(chat_id, "Draining the water")
+        GPIO.output(17,False)
+        time.sleep(400)
+        GPIO.output(17,True)
+        bot.sendMessage(chat_id, "Tank is ready to clean")
+    elif command == '/refill':
+        bot.sendMessage(chat_id, "Refilling")
+        GPIO.output(17,False)
+        time.sleep(700)
+        GPIO.output(17,True)
+        bot.sendMessage(chat_id, "Tank is full")
+    elif command == '/food':
+        bot.sendMessage(chat_id, "Adding food")
+        GPIO.output(4,False)
+        time.sleep(60)
+        GPIO.output(4,True)
+        bot.sendMessage(chat_id, "Food added")
+    elif command == '/temperature':
+        humidity, temperature = Adafruit_DHT.read_retry(11, 18)
+        bot.sendMessage(chat_id, 'Temp: {0:0.1f} C  Humidity: {1:0.1f} %'.format(temperature, humidity))
+    #Relay control
+    elif command == '/relay1-on':
+        GPIO.output(4,False)
+        bot.sendMessage(chat_id, "Relay 1 is on")
+    elif command == '/relay1-off':
+        GPIO.output(4,True)
+        bot.sendMessage(chat_id, "Relay 1 is off")
+    elif command == '/relay2-on':
+        GPIO.output(17,False)
+        bot.sendMessage(chat_id, "Relay 2 is on")
+    elif command == '/relay2-off':
+        GPIO.output(17,True)
+        bot.sendMessage(chat_id, "Relay 2 is off")
+    elif command == '/relay3-on':
+        GPIO.output(27,False)
+        bot.sendMessage(chat_id, "Relay 3 is on")
+    elif command == '/relay3-off':
+        GPIO.output(27,True)
+        bot.sendMessage(chat_id, "Relay 3 is off")
+    elif command == '/relay4-on':
+        GPIO.output(23,False)
+        bot.sendMessage(chat_id, "Relay 4 is on")
+    elif command == '/relay4-off':
+        GPIO.output(23,True)
+        bot.sendMessage(chat_id, "Relay 4 is off")
+
+
+
+
+
+
+bot = telepot.Bot('your token')
+
+MessageLoop(bot, handle).run_as_thread()
+print 'I am listening ...'
+
+while 1:
+    time.sleep(10)
